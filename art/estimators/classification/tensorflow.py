@@ -535,7 +535,8 @@ class TensorFlowClassifier(ClassGradientsMixin, ClassifierMixin, TensorFlowEstim
         """
         # pylint: disable=E0401
         import tensorflow as tf  # lgtm [py/repeated-import]
-
+        # import tensorflow.compat.v1 as tf
+        # tf.disable_eager_execution()
         # Get the computational graph
         with self._sess.graph.as_default():
             graph = tf.get_default_graph()

@@ -17,6 +17,7 @@ from art.utils import load_mnist
 
 # Step 2: Create the model
 
+# tf.disable_eager_execution()
 input_ph = tf.placeholder(tf.float32, shape=[None, 28, 28, 1])
 labels_ph = tf.placeholder(tf.int32, shape=[None, 10])
 

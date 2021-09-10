@@ -755,7 +755,7 @@ def load_cifar10(
         "cifar-10-batches-py",
         extract=True,
         path=config.ART_DATA_PATH,
-        url="http://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz",
+        url="https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz",
     )
 
     num_train_samples = 50000
@@ -1101,7 +1101,8 @@ def get_file(filename: str, url: str, path: Optional[str] = None, extract: bool 
 
     if extract:
         extract_path = os.path.join(path_, filename)
-        full_path = extract_path + ".tar.gz"
+        # full_path = extract_path + ".tar.gz"
+        full_path = extract_path
     else:
         full_path = os.path.join(path_, filename)
 
