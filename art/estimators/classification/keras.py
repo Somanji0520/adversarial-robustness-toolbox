@@ -146,8 +146,8 @@ class KerasClassifier(ClassGradientsMixin, ClassifierMixin, KerasEstimator):
         """
         # pylint: disable=E0401
         if self.is_tensorflow:
-            import tensorflow as tf  # lgtm [py/repeated-import]
-
+            import tensorflow.compat.v1 as tf  # lgtm [py/repeated-import]
+            tf.disable_eager_execution()
             if tf.executing_eagerly():
                 raise ValueError("TensorFlow is executing eagerly. Please disable eager execution.")
             import tensorflow.keras as keras
