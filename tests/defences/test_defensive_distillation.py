@@ -225,9 +225,9 @@ class TestDefensiveDistillation(TestBase):
         acc = np.sum(preds1 == preds2) / len(preds1)
 
         self.assertGreater(acc, 0.2)
-
+        print("test_6_keras_iris Accuracy  : ", acc)
         ce = cross_entropy(preds1, preds2)
-
+        print("test_6_keras_iris CE : ", ce)
         self.assertLess(ce, 20)
         self.assertGreaterEqual(ce, 0)
 

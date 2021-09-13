@@ -51,7 +51,7 @@ class TestBase(unittest.TestCase):
 
         cls.n_train = 1000
         cls.n_test = 100
-        cls.batch_size = 16
+        cls.batch_size = 20
 
         cls.create_image_dataset(n_train=cls.n_train, n_test=cls.n_test)
 
@@ -162,7 +162,7 @@ def _tf_weights_loader(dataset, weights_type, layer="DENSE", tf_version=1):
             import tensorflow as tf
 
             weights = np.load(
-                os.path.join(os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", filename)
+                os.path.join(os.path.dirname(os.path.dirname(__file__)), "/resources/models/cifar10", filename)
             )
             return tf.constant(weights, dtype)
 
@@ -172,7 +172,7 @@ def _tf_weights_loader(dataset, weights_type, layer="DENSE", tf_version=1):
             import tensorflow as tf
 
             weights = np.load(
-                os.path.join(os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", filename)
+                os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources/models/cifar10", filename)
             )
             return tf.constant(weights, dtype)
 
@@ -188,7 +188,7 @@ def _kr_weights_loader(dataset, weights_type, layer="DENSE"):
     filename = str(weights_type) + "_" + str(layer) + "_" + str(dataset) + ".npy"
 
     def _kr_initializer(_, dtype=None):
-        weights = np.load(os.path.join(os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", filename))
+        weights = np.load(os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources/models/cifar10", filename))
         return k.variable(value=weights, dtype=dtype)
 
     return _kr_initializer
@@ -196,7 +196,7 @@ def _kr_weights_loader(dataset, weights_type, layer="DENSE"):
 
 def _kr_tf_weights_loader(dataset, weights_type, layer="DENSE"):
     filename = str(weights_type) + "_" + str(layer) + "_" + str(dataset) + ".npy"
-    weights = np.load(os.path.join(os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", filename))
+    weights = np.load(os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources/models/cifar10", filename))
     return weights
 
 
@@ -240,7 +240,7 @@ def get_image_classifier_tf_v1(from_logits=False, load_init=True, sess=None):
     from art.estimators.classification.tensorflow import TensorFlowClassifier
 
     # Define input and output placeholders
-    input_ph = tf.placeholder(tf.float32, shape=[None, 28, 28, 1])
+    input_ph = tf.placeholder(tf.float32, shape=[None, 32, 32, 3])
     output_ph = tf.placeholder(tf.float32, shape=[None, 10])
 
     # Define the TensorFlow graph
@@ -354,7 +354,7 @@ def get_image_classifier_tf_v2(from_logits=False):
             activation="relu",
             kernel_initializer=_tf_weights_loader("MNIST", "W", "CONV2D", 2),
             bias_initializer=_tf_weights_loader("MNIST", "B", "CONV2D", 2),
-            input_shape=(28, 28, 1),
+            input_shape=(32, 32, 3),
         )
     )
     model.add(MaxPool2D(pool_size=(4, 4), strides=(4, 4), padding="valid", data_format=None))
@@ -390,7 +390,7 @@ def get_image_classifier_tf_v2(from_logits=False):
         loss_object=loss_object,
         train_step=train_step,
         nb_classes=10,
-        input_shape=(28, 28, 1),
+        input_shape=(32, 32, 3),
         clip_values=(0, 1),
     )
 
@@ -444,9 +444,9 @@ def get_image_classifier_kr(
                     1,
                     kernel_size=(7, 7),
                     activation="relu",
-                    input_shape=(28, 28, 1),
-                    kernel_initializer=_tf_weights_loader("MNIST", "W", "CONV2D", 2),
-                    bias_initializer=_tf_weights_loader("MNIST", "B", "CONV2D", 2),
+                    input_shape=(32, 32, 3), #original(28, 28, 1)
+                    kernel_initializer=_tf_weights_loader("CIFAR10", "W", "CONV2D", 2),
+                    bias_initializer=_tf_weights_loader("CIFAR10", "B", "CONV2D", 2),
                 )
             )
         else:
@@ -455,13 +455,13 @@ def get_image_classifier_kr(
                     1,
                     kernel_size=(7, 7),
                     activation="relu",
-                    input_shape=(28, 28, 1),
-                    kernel_initializer=_kr_weights_loader("MNIST", "W", "CONV2D"),
-                    bias_initializer=_kr_weights_loader("MNIST", "B", "CONV2D"),
+                    input_shape=(32, 32, 3),
+                    kernel_initializer=_kr_weights_loader("CIFAR10", "W", "CONV2D"),
+                    bias_initializer=_kr_weights_loader("CIFAR10", "B", "CONV2D"),
                 )
             )
     else:
-        model.add(Conv2D(1, kernel_size=(7, 7), activation="relu", input_shape=(28, 28, 1)))
+        model.add(Conv2D(1, kernel_size=(7, 7), activation="relu", input_shape=(32, 32, 3)))
 
     model.add(MaxPooling2D(pool_size=(4, 4)))
     model.add(Flatten())
@@ -473,8 +473,8 @@ def get_image_classifier_kr(
                     Dense(
                         10,
                         activation="linear",
-                        kernel_initializer=_tf_weights_loader("MNIST", "W", "DENSE", 2),
-                        bias_initializer=_tf_weights_loader("MNIST", "B", "DENSE", 2),
+                        kernel_initializer=_tf_weights_loader("CIFAR10", "W", "DENSE", 2),
+                        bias_initializer=_tf_weights_loader("CIFAR10", "B", "DENSE", 2),
                     )
                 )
             else:
@@ -482,8 +482,8 @@ def get_image_classifier_kr(
                     Dense(
                         10,
                         activation="linear",
-                        kernel_initializer=_kr_weights_loader("MNIST", "W", "DENSE"),
-                        bias_initializer=_kr_weights_loader("MNIST", "B", "DENSE"),
+                        kernel_initializer=_kr_weights_loader("CIFAR10", "W", "DENSE"),
+                        bias_initializer=_kr_weights_loader("CIFAR10", "B", "DENSE"),
                     )
                 )
         else:
@@ -495,8 +495,8 @@ def get_image_classifier_kr(
                     Dense(
                         10,
                         activation="softmax",
-                        kernel_initializer=_tf_weights_loader("MNIST", "W", "DENSE", 2),
-                        bias_initializer=_tf_weights_loader("MNIST", "B", "DENSE", 2),
+                        kernel_initializer=_tf_weights_loader("CIFAR10", "W", "DENSE", 2),
+                        bias_initializer=_tf_weights_loader("CIFAR10", "B", "DENSE", 2),
                     )
                 )
             else:
@@ -504,8 +504,8 @@ def get_image_classifier_kr(
                     Dense(
                         10,
                         activation="softmax",
-                        kernel_initializer=_kr_weights_loader("MNIST", "W", "DENSE"),
-                        bias_initializer=_kr_weights_loader("MNIST", "B", "DENSE"),
+                        kernel_initializer=_kr_weights_loader("CIFAR10", "W", "DENSE"),
+                        bias_initializer=_kr_weights_loader("CIFAR10", "B", "DENSE"),
                     )
                 )
         else:
@@ -604,7 +604,7 @@ def get_image_classifier_kr_functional(input_layer=1, output_layer=1):
     from art.estimators.classification.keras import KerasClassifier
 
     def _functional_model():
-        in_layer = Input(shape=(28, 28, 1), name="input0")
+        in_layer = Input(shape=(32, 32, 3), name="input0") # original shape : (28, 28, 1)
         layer = Conv2D(32, kernel_size=(3, 3), activation="relu")(in_layer)
         layer = Conv2D(64, (3, 3), activation="relu")(layer)
         layer = MaxPooling2D(pool_size=(2, 2))(layer)
@@ -614,7 +614,7 @@ def get_image_classifier_kr_functional(input_layer=1, output_layer=1):
         layer = Dropout(0.5)(layer)
         out_layer = Dense(10, activation="softmax", name="output0")(layer)
 
-        in_layer_2 = Input(shape=(28, 28, 1), name="input1")
+        in_layer_2 = Input(shape=(32, 32, 3), name="input1")
         layer = Conv2D(32, kernel_size=(3, 3), activation="relu")(in_layer_2)
         layer = Conv2D(64, (3, 3), activation="relu")(layer)
         layer = MaxPooling2D(pool_size=(2, 2))(layer)
@@ -656,7 +656,7 @@ def get_image_classifier_kr_tf_functional(input_layer=1, output_layer=1):
     from art.estimators.classification.keras import KerasClassifier
 
     def functional_model():
-        in_layer = Input(shape=(28, 28, 1), name="input0")
+        in_layer = Input(shape=(32, 32, 3), name="input0")
         layer = Conv2D(32, kernel_size=(3, 3), activation="relu")(in_layer)
         layer = Conv2D(64, (3, 3), activation="relu")(layer)
         layer = MaxPooling2D(pool_size=(2, 2))(layer)
@@ -666,7 +666,7 @@ def get_image_classifier_kr_tf_functional(input_layer=1, output_layer=1):
         layer = Dropout(0.5)(layer)
         out_layer = Dense(10, activation="softmax", name="output0")(layer)
 
-        in_layer_2 = Input(shape=(28, 28, 1), name="input1")
+        in_layer_2 = Input(shape=(32, 32, 3), name="input1")
         layer = Conv2D(32, kernel_size=(3, 3), activation="relu")(in_layer_2)
         layer = Conv2D(64, (3, 3), activation="relu")(layer)
         layer = MaxPooling2D(pool_size=(2, 2))(layer)
@@ -719,9 +719,9 @@ def get_image_classifier_kr_tf(loss_name="categorical_crossentropy", loss_type="
 
     # Create simple CNN
     model = Sequential()
-    model.add(Conv2D(1, kernel_size=(7, 7), activation="relu", input_shape=(28, 28, 1)))
+    model.add(Conv2D(1, kernel_size=(7, 7), activation="relu", input_shape=(32, 32, 3)))
     model.layers[-1].set_weights(
-        [_kr_tf_weights_loader("MNIST", "W", "CONV2D"), _kr_tf_weights_loader("MNIST", "B", "CONV2D")]
+        [_kr_tf_weights_loader("CIFAR10", "W", "CONV2D"), _kr_tf_weights_loader("CIFAR10", "B", "CONV2D")]
     )
     model.add(MaxPooling2D(pool_size=(4, 4)))
     model.add(Flatten())
@@ -732,7 +732,7 @@ def get_image_classifier_kr_tf(loss_name="categorical_crossentropy", loss_type="
         model.add(Dense(10, activation="softmax"))
 
     model.layers[-1].set_weights(
-        [_kr_tf_weights_loader("MNIST", "W", "DENSE"), _kr_tf_weights_loader("MNIST", "B", "DENSE")]
+        [_kr_tf_weights_loader("CIFAR10", "W", "DENSE"), _kr_tf_weights_loader("CIFAR10", "B", "DENSE")]
     )
 
     if loss_name == "categorical_hinge":
@@ -870,16 +870,16 @@ def get_image_classifier_kr_tf_binary():
 
     # Create simple CNN
     model = Sequential()
-    model.add(Conv2D(1, kernel_size=(7, 7), activation="relu", input_shape=(28, 28, 1)))
+    model.add(Conv2D(1, kernel_size=(7, 7), activation="relu", input_shape=(32, 32, 3)))
     model.layers[-1].set_weights(
-        [_kr_tf_weights_loader("MNIST_BINARY", "W", "CONV2D"), _kr_tf_weights_loader("MNIST_BINARY", "B", "CONV2D")]
+        [_kr_tf_weights_loader("CIFAR10_BINARY", "W", "CONV2D"), _kr_tf_weights_loader("CIFAR10_BINARY", "B", "CONV2D")]
     )
     model.add(MaxPooling2D(pool_size=(4, 4)))
     model.add(Flatten())
     model.add(Dense(1, activation="sigmoid"))
 
     model.layers[-1].set_weights(
-        [_kr_tf_weights_loader("MNIST_BINARY", "W", "DENSE"), _kr_tf_weights_loader("MNIST_BINARY", "B", "DENSE")]
+        [_kr_tf_weights_loader("CIFAR10_BINARY", "W", "DENSE"), _kr_tf_weights_loader("CIFAR10_BINARY", "B", "DENSE")]
     )
 
     model.compile(loss="binary_crossentropy", optimizer=tf.keras.optimizers.Adam(lr=0.01), metrics=["accuracy"])
@@ -951,22 +951,22 @@ def get_image_classifier_pt(from_logits=False, load_init=True):
             if load_init:
                 w_conv2d = np.load(
                     os.path.join(
-                        os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "W_CONV2D_MNIST.npy"
+                        os.path.dirname(os.path.dirname(__file__)), "resources/models/cifar10", "W_CONV2D_CIFAR10.npy"
                     )
                 )
                 b_conv2d = np.load(
                     os.path.join(
-                        os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "B_CONV2D_MNIST.npy"
+                        os.path.dirname(os.path.dirname(__file__)), "sources/models/cifar10", "B_CONV2D_CIFAR10.npy"
                     )
                 )
                 w_dense = np.load(
                     os.path.join(
-                        os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "W_DENSE_MNIST.npy"
+                        os.path.dirname(os.path.dirname(__file__)), "esources/models/cifar10", "W_DENSE_CIFAR10.npy"
                     )
                 )
                 b_dense = np.load(
                     os.path.join(
-                        os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", "B_DENSE_MNIST.npy"
+                        os.path.dirname(os.path.dirname(__file__)), "esources/models/cifar", "B_DENSE_CIFAR10.npy"
                     )
                 )
 
@@ -1003,7 +1003,7 @@ def get_image_classifier_pt(from_logits=False, load_init=True):
 
     # Get classifier
     ptc = PyTorchClassifier(
-        model=model, loss=loss_fn, optimizer=optimizer, input_shape=(1, 28, 28), nb_classes=10, clip_values=(0, 1)
+        model=model, loss=loss_fn, optimizer=optimizer, input_shape=(3, 32, 32), nb_classes=10, clip_values=(0, 1)
     )
 
     return ptc
@@ -1037,7 +1037,7 @@ def get_image_classifier_pt_functional():
         clip_values=(0, 1),
         loss=criterion,
         optimizer=optimizer,
-        input_shape=(1, 28, 28),
+        input_shape=(3, 32, 32),
         nb_classes=10,
     )
     return classifier
@@ -1060,7 +1060,7 @@ def get_classifier_bb(defences=None):
             predictions = json.load(json_file)
         return to_categorical(predictions["values"][: len(x)], nb_classes=10)
 
-    bbc = BlackBoxClassifier(predict, (28, 28, 1), 10, clip_values=(0, 255), preprocessing_defences=defences)
+    bbc = BlackBoxClassifier(predict, (32, 32, 3), 10, clip_values=(0, 255), preprocessing_defences=defences)
     return bbc
 
 
@@ -1082,7 +1082,7 @@ def get_classifier_bb_nn(defences=None):
         return to_categorical(predictions["values"][: len(x)], nb_classes=10)
 
     bbc = BlackBoxClassifierNeuralNetwork(
-        predict, (28, 28, 1), 10, clip_values=(0, 255), preprocessing_defences=defences
+        predict, (32, 32, 3), 10, clip_values=(0, 255), preprocessing_defences=defences
     )
     return bbc
 
